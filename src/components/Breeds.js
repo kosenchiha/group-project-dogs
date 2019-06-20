@@ -7,9 +7,20 @@ class Breeds extends React.Component {
     this.state = {
       listOfBreeds: [],
       imgSrc: [],
+      breedName: "",
       isChanged: false
     };
   }
+  fetchData = (breedName) => {
+    fetch("https://dog.ceo/api/breed/" + breedName + "/images/random")
+      .then((res) => res.json())
+      .then((data) => {
+        this.setState({
+          imgSrc: data.message,
+          breedName: breedName
+        });
+      });
+  };
   componentDidMount() {
     fetch("https://dog.ceo/api/breeds/list/all")
       .then((res) => res.json())
@@ -17,36 +28,41 @@ class Breeds extends React.Component {
         this.setState({
           listOfBreeds: Object.keys(data.message)
         });
+        let listOfBreeds = this.state.listOfBreeds;
+        let randomBreed = listOfBreeds[Math.floor(Math.random() * listOfBreeds.length + 1)];
+        this.fetchData(randomBreed);
       });
   }
 
   changeHandler = (event) => {
-    fetch("https://dog.ceo/api/breed/" + event.target.value + "/images/random")
-      .then((res) => res.json())
-      .then((data) => {
-        this.setState({
-          imgSrc: data.message
-        });
-      });
+    this.fetchData(event.target.value);
+  };
+  onClickHandler = (event) => {
+    this.fetchData(this.state.breedName);
   };
   render() {
     return (
       <div className="Breeds">
         <h2 className="Breeds-title">Select a Breed</h2>
         <p>
-          <div>
-            <select className="Breeds-select" onChange={this.changeHandler}>
-              {this.state.listOfBreeds.map((dog) => (
-                <option>{dog}</option>
-              ))}
-            </select>
-          </div>
+          <select className="Breeds-select" onChange={this.changeHandler}>
+            {this.state.listOfBreeds.map((dog, index) => (
+              <option key={index}>{dog}</option>
+            ))}
+          </select>
         </p>
 
-        <img className="Breeds-image" onChange={this.changeHandler} src={this.state.imgSrc} />
+        <img
+          className="Breeds-image"
+          onChange={this.changeHandler}
+          alt=""
+          src={this.state.imgSrc}
+        />
 
         <p>
-          <button className="Breeds-button">Show me more!</button>
+          <button className="Breeds-button" onClick={this.onClickHandler}>
+            Show me more!
+          </button>
         </p>
       </div>
     );
